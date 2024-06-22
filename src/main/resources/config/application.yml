@@ -1,0 +1,8 @@
+logging:
+  level:
+    org.springframework.security: trace
+    org.example.springboot3oauth2security: trace
+
+spring:
+  application:
+    name: spring-boot-3-oauth2-security
