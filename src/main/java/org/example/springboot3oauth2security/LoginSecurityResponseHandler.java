@@ -1,23 +1,43 @@
 package org.example.springboot3oauth2security;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
+import java.io.IOException;
 import java.io.Serial;
 
-public interface LoginSecurityResponseHandler {
+public interface LoginSecurityResponseHandler extends AuthenticationFailureHandler {
 
-    void handle(LoginSecurityAction action, HttpServletRequest request, HttpServletResponse response, LoginSecurityException exception);
+    void handle(HttpServletRequest request, HttpServletResponse response, LoginSecurityException exception) throws ServletException, IOException;
 
-    enum LoginSecurityAction {
-        PASSWORD_CHANGE_REQUIRED,   // when the user logs in successfully but needs to change their expired password.
-        LOGIN_ATTEMPT_LOCKED,       // when the user has exceeded the maximum number of invalid login attempts.
-        LOCKDOWN_IN_EFFECT          // when the user is attempting to log in during a lockdown period.
-    }
+    abstract class LoginSecurityException extends AuthenticationException {
 
-    class LoginSecurityException extends RuntimeException {
         @Serial
-        private static final long serialVersionUID = -1;
+        private static final long serialVersionUID = 4150324719642480969L;
+        private final String authenticationFailureUrl;
+        private final boolean includeMessage;
+
+        protected LoginSecurityException(String msg, Throwable cause, String authenticationFailureUrl, boolean includeMessage) {
+            super(msg, cause);
+            this.authenticationFailureUrl = authenticationFailureUrl;
+            this.includeMessage = includeMessage;
+        }
+
+        protected LoginSecurityException(String msg, Throwable cause, String authenticationFailureUrl) {
+            this(msg, cause, authenticationFailureUrl, true);
+        }
+
+        public String getAuthenticationFailureUrl() {
+            return authenticationFailureUrl;
+        }
+
+        public boolean isIncludeMessage() {
+            return includeMessage;
+        }
+
     }
 
 }

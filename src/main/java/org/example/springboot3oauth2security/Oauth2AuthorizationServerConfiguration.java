@@ -8,8 +8,11 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -29,6 +32,7 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.security.KeyPair;
@@ -43,12 +47,13 @@ public class Oauth2AuthorizationServerConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
+        OAuth2AuthorizationServerConfigurer configurer = http.getConfigurer(OAuth2AuthorizationServerConfigurer.class);
+        configurer.oidc(Customizer.withDefaults()); // Enable OpenID Connect 1.0
         http
-                // Redirect to the login page when not authenticated from the authorization endpoint
+                .securityMatcher(configurer.getEndpointsMatcher())
+                 // Redirect to the login page when not authenticated from the authorization endpoint
                 .exceptionHandling(e -> e
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
@@ -63,15 +68,31 @@ public class Oauth2AuthorizationServerConfiguration {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
-            throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, CustomLoginSecurityFilter customLoginSecurityFilter) throws Exception {
         http
-                .authorizeHttpRequests(a -> a.anyRequest().authenticated())
-                // Form login handles the redirect to the login page from the
-                // authorization server filter chain
-                .formLogin(Customizer.withDefaults());
+                // Form login handles the redirect to the login page from the authorization server filter chain
+                .formLogin(l -> l.loginPage("/login").permitAll())
+                .logout(l -> l.logoutUrl("/logout").permitAll())
+                .addFilterBefore(customLoginSecurityFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(r -> r
+                        // override the AbstractAuthenticationFilterConfigurer access default
+                        // Should create custom RequestMatcher to accept the parameter format
+                        .requestMatchers(HttpMethod.GET, "/login").permitAll()
+                        .anyRequest().authenticated()
+                )
+                ;
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class).build();
+    }
+
+    @Bean
+    public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager, LoginSecurityStrategy loginSecurityStrategy) {
+        return new CustomLoginSecurityFilter(authenticationManager, loginSecurityStrategy);
     }
 
     @Bean
