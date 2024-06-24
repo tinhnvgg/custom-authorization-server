@@ -16,7 +16,7 @@ public class CacheableLoginSecurityStrategy implements LoginSecurityStrategy {
     // Sample settings ------------------------------------------------------------------------------------------------
     private static final int MAXIMUM_PASSWORD_AGE = 60;             // DAYS
     private static final int MAXIMUM_LOGIN_FAILURE_ATTEMPTS = 3;    // TIMES
-    private static final long LOCKDOWN_DURATION = 30;               // SECONDS
+    private static final long LOCKDOWN_DURATION = 5 * 60L;          // SECONDS
     private final SampleLoginSecurityCache loginSecurityCache = new SampleLoginSecurityCache();
 
 //    @Component

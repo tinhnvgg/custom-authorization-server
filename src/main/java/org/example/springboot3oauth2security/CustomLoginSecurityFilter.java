@@ -102,6 +102,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         this.loginSecurityResponseHandler = loginSecurityResponseHandler;
     }
 
+    public LoginSecurityResponseHandler getLoginSecurityResponseHandler() {
+        return loginSecurityResponseHandler;
+    }
+
     public void setLoginPage(String loginPage) {
         this.loginPage = loginPage;
     }

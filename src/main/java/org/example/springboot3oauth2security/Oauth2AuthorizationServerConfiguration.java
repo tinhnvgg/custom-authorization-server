@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -109,11 +110,13 @@ public class Oauth2AuthorizationServerConfiguration {
     @Bean
     public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager,
                                                                LoginSecurityStrategy loginSecurityStrategy,
-                                                               SecurityContextRepository securityContextRepository) {
+                                                               SecurityContextRepository securityContextRepository,
+                                                               MessageSource messageSource) {
         CustomLoginSecurityFilter filter = new CustomLoginSecurityFilter(
                 authenticationManager, loginSecurityStrategy, securityContextRepository
         );
         filter.setLoginPage(LOGIN_PAGE);
+        filter.getLoginSecurityResponseHandler().setMessageSource(messageSource);
         return filter;
     }
 

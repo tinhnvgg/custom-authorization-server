@@ -1,6 +1,8 @@
 package org.example.springboot3oauth2security;
 
 import java.io.Serial;
+import java.time.Duration;
+import java.time.Instant;
 
 public class LockdownInEffectException extends LoginSecurityResponseHandler.LoginSecurityException {
 
@@ -8,7 +10,8 @@ public class LockdownInEffectException extends LoginSecurityResponseHandler.Logi
     private static final long serialVersionUID = -9146130005545048789L;
 
     public LockdownInEffectException(long endLockdownTime, String failureUrl) {
-        super("Lockdown in effect until " + endLockdownTime, null, failureUrl); // TODO: define message
+        super("LOGIN_LOCKDOWN_IN_EFFECT_MESSAGE", null, failureUrl);
+        setMessageParameters(Duration.between(Instant.now(), Instant.ofEpochSecond(endLockdownTime)).toMinutes());
     }
 
 }

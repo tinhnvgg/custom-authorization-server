@@ -8,7 +8,7 @@ public class PasswordExpiredException extends LoginSecurityResponseHandler.Login
     private static final long serialVersionUID = -6504829636309671086L;
 
     public PasswordExpiredException(String changePasswordPath) {
-        super("Password has been expired", null, changePasswordPath, false);
+        super("PASSWORD_CHANGE_REQUIRED_MESSAGE", null, changePasswordPath, false);
     }
 
 }

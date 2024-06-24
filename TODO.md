@@ -9,4 +9,4 @@
 - [x] Change-password page redirection with stored security context
 - [x] Change-password form format and setting.
 - [x] Handle changing expired password function.
-- [ ] Message source config and update message properties.
+- [x] Message source config and update message properties.
