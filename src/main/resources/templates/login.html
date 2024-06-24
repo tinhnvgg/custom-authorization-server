@@ -17,7 +17,7 @@
         <div class="login-form">
             <form method="POST" th:action="@{/login}">
                 <h2>Another text</h2>
-                <p class="login-error-message" th:if="${param.error}">Error here</p>
+                <p class="login-error-message" th:if="${param.error}" th:text="${param.error}"></p>
                 <div class="container">
                     <div class="input-box">
                         <img class="input-icon" src="https://csdlthanhtra.danang.gov.vn/assets/images/user.svg" alt="user" />

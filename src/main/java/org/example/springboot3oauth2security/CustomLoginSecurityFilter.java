@@ -24,7 +24,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
      */
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
     private static final String LOGIN_FAILURE_PATH = DEFAULT_ANT_PATH_REQUEST_MATCHER.getPattern() + "?error";
-    public static final String CHANGE_PASSWORD_PATH = "/change-password";
+    private String changePasswordPage = "/change-password";
 
     private final LoginSecurityStrategy loginSecurityStrategy;
     private LoginSecurityResponseHandler loginSecurityResponseHandler = new DefaultLoginSecurityResponseHandler();
@@ -39,10 +39,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         this.loginSecurityStrategy.setUsername(obtainUsername(request));
         logger.trace("Check the number of failed login attempts and lockdown duration before attempting authentication");
-        long remainingLockdownTime = loginSecurityStrategy.waitingForLockdownDuration();
-        if (remainingLockdownTime > 0) {
-            logger.debug("This current login request is in lockdown time"); // remaining lockdown time > E02
-            throw new LockdownInEffectException(remainingLockdownTime, LOGIN_FAILURE_PATH);
+        long endLockDownTime = loginSecurityStrategy.waitingForLockdownDuration();
+        if (endLockDownTime > 0) {
+            logger.debug("This current login request is in lockdown time");
+            throw new LockdownInEffectException(endLockDownTime, LOGIN_FAILURE_PATH);
         } else {
             return super.attemptAuthentication(request, response);
         }
@@ -53,7 +53,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         logger.trace("Check password expiration after successful authentication");
         if (loginSecurityStrategy.passwordHasExpired()) {
             logger.debug("Redirect to change password page when the password was expired");
-            loginSecurityResponseHandler.handle(request, response, new PasswordExpiredException(CHANGE_PASSWORD_PATH));
+            loginSecurityResponseHandler.handle(request, response, new PasswordExpiredException(changePasswordPage));
         } else {
 //            super.successfulAuthentication(request, response, chain, authResult);
             // instead of calling super successful authentication method,
@@ -95,6 +95,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
 
     public LoginSecurityStrategy getLoginSecurityStrategy() {
         return loginSecurityStrategy;
+    }
+
+    public void setChangePasswordPage(String changePasswordPage) {
+        this.changePasswordPage = changePasswordPage;
     }
 
 }

@@ -7,8 +7,8 @@ public class LockdownInEffectException extends LoginSecurityResponseHandler.Logi
     @Serial
     private static final long serialVersionUID = -9146130005545048789L;
 
-    public LockdownInEffectException(long remainingLockdownTime, String failureUrl) {
-        super("Lockdown in effect", null, failureUrl); // TODO: define message
+    public LockdownInEffectException(long endLockdownTime, String failureUrl) {
+        super("Lockdown in effect until " + endLockdownTime, null, failureUrl); // TODO: define message
     }
 
 }

@@ -1,13 +1,12 @@
 package org.example.springboot3oauth2security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Optional;
-
-import static org.example.springboot3oauth2security.SampleCache.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CacheableLoginSecurityStrategy implements LoginSecurityStrategy {
@@ -16,17 +15,18 @@ public class CacheableLoginSecurityStrategy implements LoginSecurityStrategy {
 
     // Sample settings ------------------------------------------------------------------------------------------------
     private static final int MAXIMUM_PASSWORD_AGE = 60;             // DAYS
-    private static final int MAXIMUM_LOGIN_FAILURE_ATTEMPTS = 5;    // TIMES
-    private static final long LOCKDOWN_DURATION = 5L * 60;           // SECONDS
-    private SampleLoginSecurityCache loginSecurityCache;
+    private static final int MAXIMUM_LOGIN_FAILURE_ATTEMPTS = 3;    // TIMES
+    private static final long LOCKDOWN_DURATION = 30;               // SECONDS
+    private final SampleLoginSecurityCache loginSecurityCache = new SampleLoginSecurityCache();
 
-    @Autowired
-    public void setLoginSecurityCache(SampleLoginSecurityCache loginSecurityCache) {
-        this.loginSecurityCache = loginSecurityCache;
-    }
-
-    @Component
+//    @Component
     public static class SampleLoginSecurityCache {
+        static final Map<String, Long> LOCKDOWN_DURATION_CACHE = new ConcurrentHashMap<>();
+        static final Map<String, Integer> LOGIN_FAILURE_ATTEMPTS_CACHE = new ConcurrentHashMap<>();
+        static final Map<String, Instant> LAST_CHANGED_PASS_CACHE = new ConcurrentHashMap<>();
+        static {
+            LAST_CHANGED_PASS_CACHE.put("user", Instant.now().minus(61, ChronoUnit.DAYS));
+        }
 
 //        @CachePut(cacheNames = "LOCKDOWN_DURATION", key = "#username")
         public void updateEndLockdownTime(String username, long endLockdownTime) {
@@ -95,9 +95,9 @@ public class CacheableLoginSecurityStrategy implements LoginSecurityStrategy {
 
     @Override
     public int increaseLoginFailureCount() {
-        int failureCount = loginSecurityCache.getNumberOfLoginFailureCount(username).orElse(0);
+        int failureCount = loginSecurityCache.getNumberOfLoginFailureCount(username).orElse(0) + 1;
         if (failureCount < MAXIMUM_LOGIN_FAILURE_ATTEMPTS) {
-            loginSecurityCache.updateLoginFailureAttempts(username, ++failureCount);
+            loginSecurityCache.updateLoginFailureAttempts(username, failureCount);
             return MAXIMUM_LOGIN_FAILURE_ATTEMPTS - failureCount;
         } else {
             loginSecurityCache.evictLoginFailureAttempts(username);
