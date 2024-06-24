@@ -1,38 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Title</title>
-    <link href="https://csdlthanhtra.danang.gov.vn/css/login.css" rel="stylesheet" />
+    <title>Login</title>
 </head>
-
 <body>
-<div class="login-page">
-    <div class="login-content">
-        <img class="logo" src="https://csdlthanhtra.danang.gov.vn/assets/images/logo.png" alt="logo">
-        <h1 class="title">This is the title</h1>
-        <div class="login-form">
-            <form method="POST" th:action="@{/login}">
-                <h2>Another text</h2>
-                <p class="login-error-message" th:if="${param.error}" th:text="${param.error}"></p>
-                <div class="container">
-                    <div class="input-box">
-                        <img class="input-icon" src="https://csdlthanhtra.danang.gov.vn/assets/images/user.svg" alt="user" />
-                        <input type="text" th:placeholder="user" name="username" required autofocus />
-                    </div>
-                    <div class="input-box">
-                        <img class="input-icon" src="https://csdlthanhtra.danang.gov.vn/assets/images/password.svg" alt="password" />
-                        <input type="password" name="password" required />
-                    </div>
-                    <button class="login-buton" type="submit" th:text="Login"></button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<p th:if="${param.error}" th:text="${param.error}"></p>
+<form method="post" th:action="@{/login}">
+    <input type="text" placeholder="username" name="username" required autofocus />
+    <input type="password" name="password" required />
+    <button type="submit" th:text="LOGIN"></button>
+</form>
 </body>
-
 </html>
