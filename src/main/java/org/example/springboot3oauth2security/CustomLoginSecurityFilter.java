@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.io.IOException;
 
@@ -22,9 +21,9 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     /**
      * This is a default setting from form login configurer and UsernamePasswordAuthenticationFilter
      */
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
-    private static final String LOGIN_FAILURE_PATH = DEFAULT_ANT_PATH_REQUEST_MATCHER.getPattern() + "?error";
+    private String loginPage = "/login";
     private String changePasswordPage = "/change-password";
+    private String errorKeyParameter = "error";
 
     private final LoginSecurityStrategy loginSecurityStrategy;
     private LoginSecurityResponseHandler loginSecurityResponseHandler = new DefaultLoginSecurityResponseHandler();
@@ -35,6 +34,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         setAuthenticationManager(authenticationManager);
     }
 
+    private String getLoginFailurePath() {
+        return loginPage + "?" + errorKeyParameter;
+    }
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         this.loginSecurityStrategy.setUsername(obtainUsername(request));
@@ -42,7 +45,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         long endLockDownTime = loginSecurityStrategy.waitingForLockdownDuration();
         if (endLockDownTime > 0) {
             logger.debug("This current login request is in lockdown time");
-            throw new LockdownInEffectException(endLockDownTime, LOGIN_FAILURE_PATH);
+            throw new LockdownInEffectException(endLockDownTime, getLoginFailurePath());
         } else {
             return super.attemptAuthentication(request, response);
         }
@@ -75,13 +78,13 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         if (remainingLoginFailureCount <= 0) {
             logger.debug("Exceed the allowed number of login attempts");
             long newLockdownTime = loginSecurityStrategy.createLockdownDuration();
-            loginSecurityResponseHandler.handle(request, response, new LoginAttemptExceededException(newLockdownTime, failed, LOGIN_FAILURE_PATH));
+            loginSecurityResponseHandler.handle(request, response, new LoginAttemptExceededException(newLockdownTime, failed, getLoginFailurePath()));
         } else {
             // The SimpleUrlAuthenticationFailureHandler.defaultFailureUrl has been initialized with FormLoginConfigurer by default,
             // So instead of using default SimpleUrlAuthenticationFailureHandler class,
             // we should use directly LoginSecurityResponseHandler instance as an AuthenticationFailureHandler in this case
             BadCredentialException remainingLoginFailureCountStoreEx = new BadCredentialException(remainingLoginFailureCount, failed);
-            super.unsuccessfulAuthentication(request, response, new BadCredentialException(LOGIN_FAILURE_PATH, null, remainingLoginFailureCountStoreEx));
+            super.unsuccessfulAuthentication(request, response, new BadCredentialException(getLoginFailurePath(), null, remainingLoginFailureCountStoreEx));
         }
     }
 
@@ -89,16 +92,15 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         this.loginSecurityResponseHandler = loginSecurityResponseHandler;
     }
 
-    public LoginSecurityResponseHandler getLoginSecurityResponseHandler() {
-        return loginSecurityResponseHandler;
-    }
-
-    public LoginSecurityStrategy getLoginSecurityStrategy() {
-        return loginSecurityStrategy;
+    public void setLoginPage(String loginPage) {
+        this.loginPage = loginPage;
     }
 
     public void setChangePasswordPage(String changePasswordPage) {
         this.changePasswordPage = changePasswordPage;
     }
 
+    public void setErrorKeyParameter(String errorKeyParameter) {
+        this.errorKeyParameter = errorKeyParameter;
+    }
 }

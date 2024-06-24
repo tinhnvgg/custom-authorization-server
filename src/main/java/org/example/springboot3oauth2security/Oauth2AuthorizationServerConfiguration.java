@@ -111,7 +111,9 @@ public class Oauth2AuthorizationServerConfiguration {
 
     @Bean
     public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager, LoginSecurityStrategy loginSecurityStrategy) {
-        return new CustomLoginSecurityFilter(authenticationManager, loginSecurityStrategy);
+        CustomLoginSecurityFilter filter = new CustomLoginSecurityFilter(authenticationManager, loginSecurityStrategy);
+        filter.setLoginPage(LOGIN_PAGE);
+        return filter;
     }
 
     @Bean
