@@ -1,4 +1,4 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.configuration;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

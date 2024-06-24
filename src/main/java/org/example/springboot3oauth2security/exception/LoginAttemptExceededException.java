@@ -1,5 +1,6 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.exception;
 
+import org.example.springboot3oauth2security.custom.LoginSecurityResponseHandler;
 import org.springframework.security.core.AuthenticationException;
 
 import java.io.Serial;

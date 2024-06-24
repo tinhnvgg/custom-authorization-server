@@ -1,4 +1,4 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.configuration;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;

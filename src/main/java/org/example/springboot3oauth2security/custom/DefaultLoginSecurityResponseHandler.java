@@ -1,9 +1,10 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.custom;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.util.URLEncoder;
+import org.example.springboot3oauth2security.exception.BadCredentialException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.AuthenticationException;

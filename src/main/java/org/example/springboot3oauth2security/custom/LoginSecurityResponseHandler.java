@@ -1,4 +1,4 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.custom;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

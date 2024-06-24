@@ -1,9 +1,13 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.custom;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.springboot3oauth2security.exception.BadCredentialException;
+import org.example.springboot3oauth2security.exception.LockdownInEffectException;
+import org.example.springboot3oauth2security.exception.LoginAttemptExceededException;
+import org.example.springboot3oauth2security.exception.PasswordExpiredException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;

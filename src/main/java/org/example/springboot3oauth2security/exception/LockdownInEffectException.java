@@ -1,4 +1,6 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.exception;
+
+import org.example.springboot3oauth2security.custom.LoginSecurityResponseHandler;
 
 import java.io.Serial;
 import java.time.Duration;

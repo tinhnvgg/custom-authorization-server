@@ -1,10 +1,12 @@
-package org.example.springboot3oauth2security;
+package org.example.springboot3oauth2security.configuration;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.example.springboot3oauth2security.custom.CustomLoginSecurityFilter;
+import org.example.springboot3oauth2security.custom.LoginSecurityStrategy;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
