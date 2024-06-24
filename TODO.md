@@ -6,6 +6,7 @@
 - [x] Resolve TODO tasks.
 - [x] Login form format and setting.
 ### Jun 24, 2024
-- [ ] Change password form format and setting.
-- [ ] Handle change expired password function.
+- [x] Change-password page redirection with stored security context
+- [ ] Change-password form format and setting.
+- [ ] Handle changing expired password function.
 - [ ] Message source config and update message properties.

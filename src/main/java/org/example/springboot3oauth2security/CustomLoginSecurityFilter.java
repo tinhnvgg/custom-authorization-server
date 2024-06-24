@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.io.IOException;
 
@@ -28,10 +29,13 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     private final LoginSecurityStrategy loginSecurityStrategy;
     private LoginSecurityResponseHandler loginSecurityResponseHandler = new DefaultLoginSecurityResponseHandler();
 
-    public CustomLoginSecurityFilter(AuthenticationManager authenticationManager, LoginSecurityStrategy loginSecurityStrategy) {
-        this.loginSecurityStrategy = loginSecurityStrategy;
+    public CustomLoginSecurityFilter(AuthenticationManager authenticationManager,
+                                     LoginSecurityStrategy loginSecurityStrategy,
+                                     SecurityContextRepository securityContextRepository) {
         this.setAuthenticationFailureHandler(loginSecurityResponseHandler);
+        this.loginSecurityStrategy = loginSecurityStrategy;
         setAuthenticationManager(authenticationManager);
+        setSecurityContextRepository(securityContextRepository);
     }
 
     private String getLoginFailurePath() {
@@ -41,7 +45,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         this.loginSecurityStrategy.setUsername(obtainUsername(request));
-        logger.trace("Check the number of failed login attempts and lockdown duration before attempting authentication");
+        logger.trace("Check the lockdown duration before attempting authentication");
         long endLockDownTime = loginSecurityStrategy.waitingForLockdownDuration();
         if (endLockDownTime > 0) {
             logger.debug("This current login request is in lockdown time");
@@ -56,6 +60,11 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         logger.trace("Check password expiration after successful authentication");
         if (loginSecurityStrategy.passwordHasExpired()) {
             logger.debug("Redirect to change password page when the password was expired");
+            // Save security context and then redirecting to change-password page
+            // Use super onSuccessfulAuthentication method with a Non-authentication-success-handler
+            // Be careful to remove this authentication-success-handler setting when above issues is solved
+            super.setAuthenticationSuccessHandler((request1, response1, authentication) -> {/* do nothing */});
+            super.successfulAuthentication(request, response, chain, authResult);
             loginSecurityResponseHandler.handle(request, response, new PasswordExpiredException(changePasswordPage));
         } else {
 //            super.successfulAuthentication(request, response, chain, authResult);
@@ -70,6 +79,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         if (failed instanceof LockdownInEffectException ex) {
+            logger.trace("Handle login request for account in lockdown time");
             loginSecurityResponseHandler.handle(request, response, ex);
             return;
         }
@@ -103,4 +113,5 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     public void setErrorKeyParameter(String errorKeyParameter) {
         this.errorKeyParameter = errorKeyParameter;
     }
+
 }

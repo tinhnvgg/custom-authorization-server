@@ -15,8 +15,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,6 +33,8 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -45,7 +45,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,7 +99,6 @@ public class Oauth2AuthorizationServerConfiguration {
                         .anyRequest().authenticated()
                 )
                 ;
-
         return http.build();
     }
 
@@ -110,10 +108,19 @@ public class Oauth2AuthorizationServerConfiguration {
     }
 
     @Bean
-    public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager, LoginSecurityStrategy loginSecurityStrategy) {
-        CustomLoginSecurityFilter filter = new CustomLoginSecurityFilter(authenticationManager, loginSecurityStrategy);
+    public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager,
+                                                               LoginSecurityStrategy loginSecurityStrategy,
+                                                               SecurityContextRepository securityContextRepository) {
+        CustomLoginSecurityFilter filter = new CustomLoginSecurityFilter(
+                authenticationManager, loginSecurityStrategy, securityContextRepository
+        );
         filter.setLoginPage(LOGIN_PAGE);
         return filter;
+    }
+
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
     }
 
     @Bean
