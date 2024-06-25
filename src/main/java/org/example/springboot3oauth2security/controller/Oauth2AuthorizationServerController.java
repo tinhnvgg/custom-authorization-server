@@ -22,17 +22,17 @@ public class Oauth2AuthorizationServerController {
 
     @GetMapping("/login")
     public String login() {
-        return "login";
+        return "views/login";
     }
 
     @GetMapping("/logout")
     public String logout() {
-        return "logout";
+        return "views/logout";
     }
 
     @GetMapping("/change-password")
     public String changePasswordPage() {
-        return "change-password";
+        return "views/change-password";
     }
 
     @PostMapping("/change-password")

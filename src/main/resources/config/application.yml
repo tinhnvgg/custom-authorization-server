@@ -6,3 +6,9 @@ logging:
 spring:
   application:
     name: spring-boot-3-oauth2-security
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    use-code-as-default-message: true
+  thymeleaf:
+    suffix: .html # this is default setting
