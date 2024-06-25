@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +32,7 @@ public class DefaultLoginSecurityResponseHandler extends SimpleUrlAuthentication
     private String getMessageValue(LoginSecurityException e) {
         return "=" + Optional.ofNullable(messageSource)
                 .map(m -> messageSource.getMessage(e.getMessage(), e.getMessageParameters(), LocaleContextHolder.getLocale()))
-                .map(m -> URLEncoder.DEFAULT.encode(m, StandardCharsets.UTF_8))
+                .map(m -> UriUtils.encodePath(m, StandardCharsets.UTF_8))
                 .orElse(e.getMessage());
     }
 
