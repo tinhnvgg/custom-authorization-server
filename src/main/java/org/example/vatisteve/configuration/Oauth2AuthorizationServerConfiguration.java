@@ -1,12 +1,12 @@
-package org.example.springboot3oauth2security.configuration;
+package org.example.vatisteve.configuration;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.example.springboot3oauth2security.custom.CustomLoginSecurityFilter;
-import org.example.springboot3oauth2security.custom.LoginSecurityStrategy;
+import org.example.vatisteve.custom.CustomLoginSecurityFilter;
+import org.example.vatisteve.custom.implement.DefaultLoginSecurityStrategy.SampleLoginSecurityCache;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -111,11 +111,10 @@ public class Oauth2AuthorizationServerConfiguration {
 
     @Bean
     public CustomLoginSecurityFilter customLoginSecurityFilter(AuthenticationManager authenticationManager,
-                                                               LoginSecurityStrategy loginSecurityStrategy,
                                                                SecurityContextRepository securityContextRepository,
                                                                MessageSource messageSource) {
         CustomLoginSecurityFilter filter = new CustomLoginSecurityFilter(
-                authenticationManager, loginSecurityStrategy, securityContextRepository
+                authenticationManager, new SampleLoginSecurityCache(), securityContextRepository
         );
         filter.setLoginPage(LOGIN_PAGE);
         filter.getLoginSecurityResponseHandler().setMessageSource(messageSource);

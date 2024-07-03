@@ -1,8 +1,9 @@
-package org.example.springboot3oauth2security.custom;
+package org.example.vatisteve.custom;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import org.springframework.context.MessageSource;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -16,6 +17,7 @@ public interface LoginSecurityResponseHandler extends AuthenticationFailureHandl
 
     void handle(HttpServletRequest request, HttpServletResponse response, LoginSecurityException exception) throws ServletException, IOException;
 
+    @Getter
     abstract class LoginSecurityException extends AuthenticationException {
 
         @Serial
@@ -32,18 +34,6 @@ public interface LoginSecurityResponseHandler extends AuthenticationFailureHandl
 
         protected LoginSecurityException(String msg, Throwable cause, String authenticationFailureUrl) {
             this(msg, cause, authenticationFailureUrl, true);
-        }
-
-        public String getAuthenticationFailureUrl() {
-            return authenticationFailureUrl;
-        }
-
-        public boolean isIncludeMessage() {
-            return includeMessage;
-        }
-
-        public Object[] getMessageParameters() {
-            return messageParameters;
         }
 
         protected void setMessageParameters(Object... messageParameters) {

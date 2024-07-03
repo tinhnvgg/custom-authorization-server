@@ -1,13 +1,13 @@
-package org.example.springboot3oauth2security;
+package org.example.vatisteve;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SpringBoot3Oauth2SecurityApplication {
+public class CustomOAuthorizationServer {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringBoot3Oauth2SecurityApplication.class, args);
+        SpringApplication.run(CustomOAuthorizationServer.class, args);
     }
 
 }

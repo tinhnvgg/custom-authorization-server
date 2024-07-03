@@ -1,13 +1,18 @@
-package org.example.springboot3oauth2security.custom;
+package org.example.vatisteve.custom;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.springboot3oauth2security.exception.BadCredentialException;
-import org.example.springboot3oauth2security.exception.LockdownInEffectException;
-import org.example.springboot3oauth2security.exception.LoginAttemptExceededException;
-import org.example.springboot3oauth2security.exception.PasswordExpiredException;
+import lombok.Getter;
+import lombok.Setter;
+import org.example.vatisteve.custom.LoginSecurityStrategy.LoginSecuritySettingsStore;
+import org.example.vatisteve.custom.exception.BadCredentialException;
+import org.example.vatisteve.custom.exception.LockdownInEffectException;
+import org.example.vatisteve.custom.exception.LoginAttemptExceededException;
+import org.example.vatisteve.custom.exception.PasswordExpiredException;
+import org.example.vatisteve.custom.implement.DefaultLoginSecurityResponseHandler;
+import org.example.vatisteve.custom.implement.DefaultLoginSecurityStrategy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -15,12 +20,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.SecurityContextRepository;
 
 import java.io.IOException;
+import java.time.Instant;
 
 /**
  * <a href="https://github.com/spring-projects/spring-security/issues/10119">
  * This Spring security version does not support to replace default Authentication filter
  * </a>.
  */
+@Setter
+@Getter
 public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticationFilter {
 
     /**
@@ -34,10 +42,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     private LoginSecurityResponseHandler loginSecurityResponseHandler = new DefaultLoginSecurityResponseHandler();
 
     public CustomLoginSecurityFilter(AuthenticationManager authenticationManager,
-                                     LoginSecurityStrategy loginSecurityStrategy,
+                                     LoginSecuritySettingsStore settingsStore,
                                      SecurityContextRepository securityContextRepository) {
         this.setAuthenticationFailureHandler(loginSecurityResponseHandler);
-        this.loginSecurityStrategy = loginSecurityStrategy;
+        this.loginSecurityStrategy = new DefaultLoginSecurityStrategy(settingsStore, true);
         setAuthenticationManager(authenticationManager);
         setSecurityContextRepository(securityContextRepository);
     }
@@ -50,8 +58,8 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         this.loginSecurityStrategy.setUsername(obtainUsername(request));
         logger.trace("Check the lockdown duration before attempting authentication");
-        long endLockDownTime = loginSecurityStrategy.waitingForLockdownDuration();
-        if (endLockDownTime > 0) {
+        Instant endLockDownTime = loginSecurityStrategy.waitingForLockdownDuration();
+        if (endLockDownTime != null) {
             logger.debug("This current login request is in lockdown time");
             throw new LockdownInEffectException(endLockDownTime, getLoginFailurePath());
         } else {
@@ -61,6 +69,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        loginSecurityStrategy.clear(); // when login successfully
         logger.trace("Check password expiration after successful authentication");
         if (loginSecurityStrategy.passwordHasExpired()) {
             logger.debug("Redirect to change password page when the password was expired");
@@ -71,10 +80,10 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
             super.successfulAuthentication(request, response, chain, authResult);
             loginSecurityResponseHandler.handle(request, response, new PasswordExpiredException(changePasswordPage));
         } else {
-//            super.successfulAuthentication(request, response, chain, authResult);
-            // instead of calling super successful authentication method,
-            // we should continue to the next filter: UsernamePasswordAuthenticationFilter
-            // because we could not replace it
+/*            super.successfulAuthentication(request, response, chain, authResult);*/
+            // Instead of calling super successful authentication method,
+            // we should let the request continue to the next filter (UsernamePasswordAuthenticationFilter)
+            // which is the default filter and could not be removed by configuration
             chain.doFilter(request, response);
         }
 
@@ -91,7 +100,7 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
         int remainingLoginFailureCount = loginSecurityStrategy.increaseLoginFailureCount();
         if (remainingLoginFailureCount <= 0) {
             logger.debug("Exceed the allowed number of login attempts");
-            long newLockdownTime = loginSecurityStrategy.createLockdownDuration();
+            Instant newLockdownTime = loginSecurityStrategy.createLockdownDuration();
             loginSecurityResponseHandler.handle(request, response, new LoginAttemptExceededException(newLockdownTime, failed, getLoginFailurePath()));
         } else {
             // The SimpleUrlAuthenticationFailureHandler.defaultFailureUrl has been initialized with FormLoginConfigurer by default,
@@ -100,26 +109,6 @@ public final class CustomLoginSecurityFilter extends UsernamePasswordAuthenticat
             BadCredentialException remainingLoginFailureCountStoreEx = new BadCredentialException(remainingLoginFailureCount, failed);
             super.unsuccessfulAuthentication(request, response, new BadCredentialException(getLoginFailurePath(), null, remainingLoginFailureCountStoreEx));
         }
-    }
-
-    public void setLoginSecurityResponseHandler(LoginSecurityResponseHandler loginSecurityResponseHandler) {
-        this.loginSecurityResponseHandler = loginSecurityResponseHandler;
-    }
-
-    public LoginSecurityResponseHandler getLoginSecurityResponseHandler() {
-        return loginSecurityResponseHandler;
-    }
-
-    public void setLoginPage(String loginPage) {
-        this.loginPage = loginPage;
-    }
-
-    public void setChangePasswordPage(String changePasswordPage) {
-        this.changePasswordPage = changePasswordPage;
-    }
-
-    public void setErrorKeyParameter(String errorKeyParameter) {
-        this.errorKeyParameter = errorKeyParameter;
     }
 
 }

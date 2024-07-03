@@ -1,10 +1,12 @@
-package org.example.springboot3oauth2security.exception;
+package org.example.vatisteve.custom.exception;
 
-import org.example.springboot3oauth2security.custom.LoginSecurityResponseHandler;
+import org.example.vatisteve.custom.LoginSecurityResponseHandler.LoginSecurityException;
 
 import java.io.Serial;
 
-public class BadCredentialException extends LoginSecurityResponseHandler.LoginSecurityException {
+import static org.example.vatisteve.custom.exception.ExceptionMessageCode.BAD_CREDENTIAL_MESSAGE;
+
+public class BadCredentialException extends LoginSecurityException {
 
     @Serial
     private static final long serialVersionUID = -6201896119543538585L;
@@ -19,7 +21,7 @@ public class BadCredentialException extends LoginSecurityResponseHandler.LoginSe
     }
 
     public BadCredentialException(int remainingLoginFailureCount, Throwable trace) {
-        super("BAD_CREDENTIAL_MESSAGE", trace, null);
+        super(BAD_CREDENTIAL_MESSAGE.getCode(), trace, null);
         setMessageParameters(remainingLoginFailureCount);
     }
 

@@ -1,4 +1,4 @@
-package org.example.springboot3oauth2security;
+package org.example.vatisteve;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -7,7 +7,7 @@ public class ServletInitializer extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(SpringBoot3Oauth2SecurityApplication.class);
+        return application.sources(CustomOAuthorizationServer.class);
     }
 
 }

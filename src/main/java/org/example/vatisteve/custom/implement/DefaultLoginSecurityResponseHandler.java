@@ -1,10 +1,11 @@
-package org.example.springboot3oauth2security.custom;
+package org.example.vatisteve.custom.implement;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.catalina.util.URLEncoder;
-import org.example.springboot3oauth2security.exception.BadCredentialException;
+import lombok.Setter;
+import org.example.vatisteve.custom.LoginSecurityResponseHandler;
+import org.example.vatisteve.custom.exception.BadCredentialException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.AuthenticationException;
@@ -15,13 +16,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
+@Setter
 public class DefaultLoginSecurityResponseHandler extends SimpleUrlAuthenticationFailureHandler implements LoginSecurityResponseHandler {
 
     private MessageSource messageSource;
-
-    public void setMessageSource(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, LoginSecurityException e) throws ServletException, IOException {

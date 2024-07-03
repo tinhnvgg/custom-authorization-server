@@ -1,6 +1,6 @@
-package org.example.springboot3oauth2security.controller;
+package org.example.vatisteve.controller;
 
-import org.example.springboot3oauth2security.custom.CacheableLoginSecurityStrategy;
+import org.example.vatisteve.custom.implement.DefaultLoginSecurityStrategy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -44,7 +44,7 @@ public class Oauth2AuthorizationServerController {
     private void doChangePassword(String name, String password) {
         UserDetails userDetails = userDetailsManager.loadUserByUsername(name);
         userDetailsManager.changePassword(userDetails.getPassword(), "{noop}" + password);
-        new CacheableLoginSecurityStrategy.SampleLoginSecurityCache().updateLastChangedPass(name, Instant.now());
+        new DefaultLoginSecurityStrategy.SampleLoginSecurityCache().updatePasswordLastModified(name, Instant.now());
     }
 
 }

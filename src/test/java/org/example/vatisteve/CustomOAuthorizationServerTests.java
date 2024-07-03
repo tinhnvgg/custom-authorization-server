@@ -1,10 +1,10 @@
-package org.example.springboot3oauth2security;
+package org.example.vatisteve;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringBoot3Oauth2SecurityApplicationTests {
+class CustomOAuthorizationServerTests {
 
     @Test
     void contextLoads() {
